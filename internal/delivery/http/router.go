@@ -1,17 +1,18 @@
 package delivery
 
 import (
+	"github.com/Soyuen/go-redis-chat-server/pkg/cache"
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine {
-	gin.SetMode(gin.DebugMode) // Set Gin mode: debug / release / test
+func NewRouter(redis cache.RedisCache) *gin.Engine {
+	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
-	// You can add Swagger UI for API documentation here.
-	registerChatRoutes(r)
+
+	// 注入 redis 給路由註冊用
+	registerChatRoutes(r, redis)
 
 	return r
 }
-
-func registerChatRoutes(r *gin.Engine) {
+func registerChatRoutes(r *gin.Engine, redis cache.RedisCache) {
 }
