@@ -2,23 +2,29 @@ package redis
 
 import (
 	"context"
-	"log"
 
+	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
 	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
+
+var _ realtimeiface.ChannelEventSubscriber = (*RedisSubscriber)(nil)
 
 type RedisSubscriber struct {
 	pubsub         pubsub.PubSub
 	channelManager realtimeiface.ChatChannelManager
 	cancelFuncs    map[string]context.CancelFunc
+	logger         loggeriface.Logger
 }
 
-func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChatChannelManager) *RedisSubscriber {
+func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChatChannelManager,
+	logger loggeriface.Logger,
+) *RedisSubscriber {
 	return &RedisSubscriber{
 		pubsub:         pub,
 		channelManager: manager,
 		cancelFuncs:    make(map[string]context.CancelFunc),
+		logger:         logger,
 	}
 }
 
@@ -33,7 +39,7 @@ func (s *RedisSubscriber) Start(channel string) {
 	go func() {
 		sub, err := s.pubsub.Subscribe(ctx, channel)
 		if err != nil {
-			log.Printf("subscribe error on channel %s: %v", channel, err)
+			s.logger.Fatalw("[RedisSubscriber] subscribe error", "channel", channel, "error", err)
 			return
 		}
 		defer sub.Close()
@@ -41,7 +47,7 @@ func (s *RedisSubscriber) Start(channel string) {
 		for {
 			msg, err := sub.Receive(ctx)
 			if err != nil {
-				log.Printf("receive error on channel %s: %v", channel, err)
+				s.logger.Fatalw("[RedisSubscriber] receive error", "channel", channel, "error", err)
 				break
 			}
 			s.channelManager.Broadcast(realtimeiface.Message{

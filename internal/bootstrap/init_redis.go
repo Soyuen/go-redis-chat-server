@@ -1,10 +1,13 @@
 package bootstrap
 
 import (
+	"fmt"
+
 	"github.com/Soyuen/go-redis-chat-server/internal/application/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/config"
 	appredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
 	"github.com/Soyuen/go-redis-chat-server/internal/realtime"
+	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
 	"github.com/redis/go-redis/v9"
 )
@@ -14,19 +17,19 @@ type AppDependencies struct {
 	RedisCache     *appredis.RedisAdapter
 	RedisPubSub    pubsub.PubSub
 	ChannelManager *realtime.ChannelManager
-	Subscriber     *chat.RedisSubscriberService
+	Subscriber     *appredis.RedisSubscriber
 	Connection     *realtime.Connection
 	ChatSvc        chat.ChatService
 }
 
-func InitRedisSubscriberService() (*AppDependencies, error) {
+func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, error) {
 	// 1. Load configuration
 	redisCfg := config.LoadRedisConfigFromEnv()
 
 	// 2. Initialize RedisAdapter (contains *redis.Client)
 	redisAdapter, err := appredis.NewRedisAdapter(redisCfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("redis adapter init failed: %w", err)
 	}
 
 	// 3. Extract *redis.Client from redisAdapter
@@ -39,8 +42,7 @@ func InitRedisSubscriberService() (*AppDependencies, error) {
 	manager := realtime.NewChannelManager()
 
 	// 6. Create Subscriber
-	subscriber := chat.NewRedisSubscriberService(pub, manager)
-
+	subscriber := appredis.NewRedisSubscriber(pub, manager, logger)
 	connHandler := realtime.NewConnection(manager)
 	chatSvc := chat.NewChatService(manager, subscriber)
 
