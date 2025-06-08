@@ -22,6 +22,8 @@ RUN go build -o server ./cmd/main.go
 # -----------------------------------------
 # Runtime stage: Runs the compiled binary
 # -----------------------------------------
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server ./cmd/main.go
+
 FROM alpine:latest
 
 # Set the working directory in the runtime container
