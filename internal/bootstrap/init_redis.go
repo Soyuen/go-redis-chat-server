@@ -43,7 +43,7 @@ func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, er
 
 	// 6. Create Subscriber
 	subscriber := appredis.NewRedisSubscriber(pub, manager, logger)
-	connHandler := realtime.NewConnection(manager)
+	connHandler := realtime.NewConnection(manager, logger)
 	chatSvc := chat.NewChatService(manager, subscriber)
 
 	// 7. Return all dependencies
