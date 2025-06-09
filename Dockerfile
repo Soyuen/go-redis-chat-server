@@ -1,6 +1,3 @@
-# -----------------------------------------
-# Build stage: Compiles the Go application
-# -----------------------------------------
 FROM golang:1.21.13 AS builder
 
 # Set the working directory inside the container
@@ -16,14 +13,12 @@ RUN go mod download
 # Copy the rest of the source code
 COPY . .
 
-# Build the Go application binary
-RUN go build -o server ./cmd/main.go
+# Compile Go binary (with static build for Alpine)
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server ./cmd/main.go
 
 # -----------------------------------------
 # Runtime stage: Runs the compiled binary
 # -----------------------------------------
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server ./cmd/main.go
-
 FROM alpine:latest
 
 # Set the working directory in the runtime container
@@ -32,7 +27,7 @@ WORKDIR /root/
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app/server .
 
-# Set environment variable (can also be set via docker-compose)
+# Set environment variable (optional)
 ENV PORT=8080
 
 # Expose the application port
