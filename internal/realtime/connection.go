@@ -20,14 +20,15 @@ func NewConnection(m *ChannelManager, logger loggeriface.Logger) *Connection {
 // Ensure the interface is implemented
 var _ realtimeiface.Connection = (*Connection)(nil)
 
-func (h *Connection) HandleConnection(conn *websocket.Conn, channel string) {
+func (h *Connection) HandleConnection(conn *websocket.Conn, channel string, onMessage func(raw []byte) *realtimeiface.Message) {
 	client := realtimeiface.NewClient(conn, h.logger)
 
 	b := h.manager.GetOrCreateChannel(channel)
 	b.Register(client)
 
 	go h.handleWrite(client)
-	h.handleRead(client, channel, b)
+
+	h.handleRead(client, b, onMessage)
 }
 
 func (h *Connection) handleWrite(client *realtimeiface.Client) {
@@ -39,17 +40,16 @@ func (h *Connection) handleWrite(client *realtimeiface.Client) {
 	client.WritePump()
 }
 
-func (h *Connection) handleRead(client *realtimeiface.Client, channel string, b *realtimeiface.Broadcaster) {
+func (h *Connection) handleRead(client *realtimeiface.Client, b *realtimeiface.Broadcaster, onMessage func(raw []byte) *realtimeiface.Message) {
 	defer func() {
 		b.Unregister(client)
 		client.Close()
 	}()
 
 	client.ReadPump(func(message []byte) {
-		msg := realtimeiface.Message{
-			Channel: channel,
-			Data:    message,
+		processed := onMessage(message)
+		if processed != nil {
+			h.manager.Broadcast(*processed)
 		}
-		h.manager.Broadcast(msg)
 	})
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type Connection interface {
-	HandleConnection(conn *websocket.Conn, channel string)
+	HandleConnection(conn *websocket.Conn, channel string, onMessage func(raw []byte) *Message)
 }
