@@ -5,8 +5,8 @@ import (
 
 	"github.com/Soyuen/go-redis-chat-server/internal/application/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/config"
+	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
 	appredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
-	"github.com/Soyuen/go-redis-chat-server/internal/realtime"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
 	"github.com/redis/go-redis/v9"
