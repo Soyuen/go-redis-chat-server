@@ -11,7 +11,7 @@ type AppConfig struct {
 }
 
 func LoadEnvConfig() AppConfig {
-	port := GetEnv("PORT", "8000")
+	port := GetEnv("PORT", "8080")
 
 	isDebugStr := GetEnv("APP_DEBUG", "false")
 

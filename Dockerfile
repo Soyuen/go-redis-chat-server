@@ -33,10 +33,10 @@ WORKDIR /root/
 COPY --from=builder /app/server .
 
 # Set environment variable (can also be set via docker-compose)
-ENV PORT=8000
+ENV PORT=8080
 
 # Expose the application port
-EXPOSE 8000
+EXPOSE 8080
 
 # Run the binary
 CMD ["./server"]
