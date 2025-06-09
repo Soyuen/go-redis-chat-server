@@ -24,7 +24,7 @@ func main() {
 		bootstrap.Logger.Fatalw("[main] failed to initailize", "error", err)
 	}
 
-	r := router.NewRouter(appDependencies.ChannelManager, appDependencies.Connection, appDependencies.ChatSvc)
+	r := router.NewRouter(appDependencies.ChannelManager, appDependencies.Connection, appDependencies.ChatSvc, bootstrap.Logger)
 	port := envCfg.Port
 	bootstrap.Logger.Infow("[main] starting server...",
 		"port", port,
