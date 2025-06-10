@@ -20,15 +20,19 @@ func NewConnection(m *ChannelManager, logger loggeriface.Logger) *Connection {
 // Ensure the interface is implemented
 var _ realtimeiface.Connection = (*Connection)(nil)
 
-func (h *Connection) HandleConnection(conn *websocket.Conn, channel string, onMessage func(raw []byte) *realtimeiface.Message) {
+func (h *Connection) HandleConnection(
+	conn *websocket.Conn,
+	channel string,
+	onMessage func(raw []byte) *realtimeiface.Message,
+	onClose func(),
+) {
 	client := realtimeiface.NewClient(conn, h.logger)
-
 	b := h.manager.GetOrCreateChannel(channel)
 	b.Register(client)
 
 	go h.handleWrite(client)
 
-	h.handleRead(client, b, onMessage)
+	h.handleRead(client, b, onMessage, onClose)
 }
 
 func (h *Connection) handleWrite(client *realtimeiface.Client) {
@@ -40,16 +44,27 @@ func (h *Connection) handleWrite(client *realtimeiface.Client) {
 	client.WritePump()
 }
 
-func (h *Connection) handleRead(client *realtimeiface.Client, b *realtimeiface.Broadcaster, onMessage func(raw []byte) *realtimeiface.Message) {
+func (h *Connection) handleRead(
+	client *realtimeiface.Client,
+	b *realtimeiface.Broadcaster,
+	onMessage func(raw []byte) *realtimeiface.Message,
+	onClose func(),
+) {
 	defer func() {
 		b.Unregister(client)
 		client.Close()
+		if onClose != nil {
+			onClose()
+		}
 	}()
 
-	client.ReadPump(func(message []byte) {
+	err := client.ReadPump(func(message []byte) {
 		processed := onMessage(message)
 		if processed != nil {
 			h.manager.Broadcast(*processed)
 		}
 	})
+	if err != nil {
+		return
+	}
 }

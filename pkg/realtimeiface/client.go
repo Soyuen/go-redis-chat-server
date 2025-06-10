@@ -1,14 +1,17 @@
 package realtimeiface
 
 import (
+	"sync"
+
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	conn   *websocket.Conn
-	send   chan []byte
-	logger loggeriface.Logger
+	conn      *websocket.Conn
+	send      chan []byte
+	logger    loggeriface.Logger
+	closeOnce sync.Once
 }
 
 func NewClient(conn *websocket.Conn, logger loggeriface.Logger,
@@ -28,12 +31,7 @@ func (c *Client) Send(message []byte) {
 	}
 }
 
-func (c *Client) ReadPump(onMessage func([]byte)) {
-	defer func() {
-		c.logger.Infow("ReadPump closing for client")
-		c.Close()
-	}()
-
+func (c *Client) ReadPump(onMessage func([]byte)) error {
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
@@ -42,7 +40,7 @@ func (c *Client) ReadPump(onMessage func([]byte)) {
 			} else {
 				c.logger.Infow("Normal disconnection", "error", err)
 			}
-			break
+			return err
 		}
 		onMessage(msg)
 	}
@@ -56,5 +54,7 @@ func (c *Client) WritePump() {
 
 func (c *Client) Close() {
 	c.conn.Close()
-	close(c.send)
+	c.closeOnce.Do(func() {
+		close(c.send)
+	})
 }
