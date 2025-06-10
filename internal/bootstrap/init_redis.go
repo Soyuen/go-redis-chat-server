@@ -7,6 +7,7 @@ import (
 	"github.com/Soyuen/go-redis-chat-server/internal/config"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
 	appredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
+	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
 	"github.com/redis/go-redis/v9"
@@ -20,6 +21,7 @@ type AppDependencies struct {
 	Subscriber     *appredis.RedisSubscriber
 	Connection     *realtime.Connection
 	ChatSvc        chat.ChatService
+	Presenter      *presenter.MessagePresenter
 }
 
 func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, error) {
@@ -44,7 +46,8 @@ func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, er
 	// 6. Create Subscriber
 	subscriber := appredis.NewRedisSubscriber(pub, manager, logger)
 	connHandler := realtime.NewConnection(manager, logger)
-	chatSvc := chat.NewChatService(manager, subscriber)
+	presenter := presenter.NewMessagePresenter(logger)
+	chatSvc := chat.NewChatService(manager, subscriber, *presenter)
 
 	// 7. Return all dependencies
 	return &AppDependencies{
@@ -55,5 +58,6 @@ func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, er
 		Subscriber:     subscriber,
 		Connection:     connHandler,
 		ChatSvc:        chatSvc,
+		Presenter:      presenter,
 	}, nil
 }
