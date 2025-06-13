@@ -5,8 +5,8 @@
 - [Introduction](#-introduction)
 - [Features](#-features)
 - [Quick Start](#-quick-start)
-- [Sequence Diagram](#-sequence-diagram)
-- [Ideas / Possible Features](#-ideas-possible-features)
+- [Sequence Diagram](#sequence-diagram)
+- [Ideas and Possible Features](#ideas-and-possible-features)
 
 
 
@@ -72,7 +72,7 @@ The frontend and public entry point are currently not open to avoid abuse and ex
 <img src="https://github.com/Soyuen/picture/blob/main/SequenceDiagram.png?raw=true" alt="consent_screen" width="600"/>
 
 
-## Ideas / Possible Features
+## Ideas and Possible Features
 
 This is a list of potential improvements. Some may be implemented in the future.
 
