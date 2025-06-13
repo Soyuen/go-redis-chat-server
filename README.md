@@ -76,7 +76,7 @@ The frontend and public entry point are currently not open to avoid abuse and ex
 
 This is a list of potential improvements. Some may be implemented in the future.
 
- ✅ Add system messages for user join/leave events  
+- ✅ Add system messages for user join/leave events  
 - [ ] Display number of users in each channel  
 - [ ] Name validation mechanism  
 - [ ] User login and authentication  
