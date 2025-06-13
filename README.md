@@ -2,8 +2,8 @@
 # Go Redis Chat Server
 ### TOC
 
-- [Introduction](#-introduction)
-- [Features](#-features)
+- [Introduction](#introduction)
+- [Features](#features)
 - [Quick Start](#-quick-start)
 - [Sequence Diagram](#sequence-diagram)
 - [Ideas and Possible Features](#ideas-and-possible-features)
