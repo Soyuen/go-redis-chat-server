@@ -37,3 +37,12 @@ func (b *BroadcasterImpl) Broadcast(message []byte) {
 		client.Send(message)
 	}
 }
+
+func (b *BroadcasterImpl) CloseAllClients() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	for client := range b.clients {
+		client.Close()
+		delete(b.clients, client)
+	}
+}
