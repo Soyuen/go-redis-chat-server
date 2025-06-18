@@ -41,3 +41,23 @@ func (cm *ChannelManager) Broadcast(msg realtimeiface.Message) {
 	broadcaster := cm.GetOrCreateChannel(msg.Channel)
 	broadcaster.Broadcast(data)
 }
+
+func (cm *ChannelManager) CloseChannel(channel string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+
+	if b, ok := cm.channels[channel]; ok {
+		b.CloseAllClients()
+		delete(cm.channels, channel)
+	}
+}
+
+func (cm *ChannelManager) CloseAllChannels() {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+
+	for name, b := range cm.channels {
+		b.CloseAllClients()
+		delete(cm.channels, name)
+	}
+}
