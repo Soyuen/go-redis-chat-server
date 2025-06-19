@@ -11,7 +11,7 @@ import (
 var _ realtimeiface.Client = (*Client)(nil)
 
 type Client struct {
-	conn      *websocket.Conn
+	conn      realtimeiface.WSConn
 	send      chan []byte
 	logger    loggeriface.Logger
 	closeOnce sync.Once
@@ -27,7 +27,7 @@ func NewClientFactory(logger loggeriface.Logger) *ClientFactory {
 	}
 }
 
-func (f *ClientFactory) New(conn *websocket.Conn) *Client {
+func (f *ClientFactory) New(conn realtimeiface.WSConn) *Client {
 	return &Client{
 		conn:   conn,
 		logger: f.logger,

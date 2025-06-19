@@ -3,7 +3,6 @@ package realtime
 import (
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
-	"github.com/gorilla/websocket"
 )
 
 type Connection struct {
@@ -24,7 +23,7 @@ func NewConnection(m *ChannelManager, logger loggeriface.Logger, clientFactory *
 var _ realtimeiface.Connection = (*Connection)(nil)
 
 func (h *Connection) HandleConnection(
-	conn *websocket.Conn,
+	conn realtimeiface.WSConn,
 	channel string,
 	onMessage func(raw []byte) *realtimeiface.Message,
 	onClose func(),
