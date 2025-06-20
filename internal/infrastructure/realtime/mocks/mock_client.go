@@ -7,6 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
+	realtimeiface "github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -81,4 +82,41 @@ func (m *MockClient) WritePump() {
 func (mr *MockClientMockRecorder) WritePump() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WritePump", reflect.TypeOf((*MockClient)(nil).WritePump))
+}
+
+// MockClientFactory is a mock of ClientFactory interface.
+type MockClientFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockClientFactoryMockRecorder
+}
+
+// MockClientFactoryMockRecorder is the mock recorder for MockClientFactory.
+type MockClientFactoryMockRecorder struct {
+	mock *MockClientFactory
+}
+
+// NewMockClientFactory creates a new mock instance.
+func NewMockClientFactory(ctrl *gomock.Controller) *MockClientFactory {
+	mock := &MockClientFactory{ctrl: ctrl}
+	mock.recorder = &MockClientFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockClientFactory) EXPECT() *MockClientFactoryMockRecorder {
+	return m.recorder
+}
+
+// New mocks base method.
+func (m *MockClientFactory) New(conn realtimeiface.WSConn) realtimeiface.Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "New", conn)
+	ret0, _ := ret[0].(realtimeiface.Client)
+	return ret0
+}
+
+// New indicates an expected call of New.
+func (mr *MockClientFactoryMockRecorder) New(conn interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "New", reflect.TypeOf((*MockClientFactory)(nil).New), conn)
 }
