@@ -18,12 +18,12 @@ type ChatService interface {
 }
 
 type chatService struct {
-	channelManager realtimeiface.ChatChannelManager
+	channelManager realtimeiface.ChannelManager
 	redisSub       realtimeiface.ChannelEventSubscriber
 	presenter      presenter.MessagePresenter
 }
 
-func NewChatService(channelManager realtimeiface.ChatChannelManager, redisSub realtimeiface.ChannelEventSubscriber, presenter presenter.MessagePresenter) ChatService {
+func NewChatService(channelManager realtimeiface.ChannelManager, redisSub realtimeiface.ChannelEventSubscriber, presenter presenter.MessagePresenter) ChatService {
 	return &chatService{
 		channelManager: channelManager,
 		redisSub:       redisSub,

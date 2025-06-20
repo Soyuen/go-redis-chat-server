@@ -13,7 +13,7 @@ import (
 )
 
 type ChatHandler struct {
-	manager     realtimeiface.ChatChannelManager
+	manager     realtimeiface.ChannelManager
 	connection  realtimeiface.Connection
 	chatService appchat.ChatService
 	upgrader    websocket.Upgrader
@@ -21,7 +21,7 @@ type ChatHandler struct {
 	logger      loggeriface.Logger
 }
 
-func NewChatHandler(manager realtimeiface.ChatChannelManager, connection realtimeiface.Connection,
+func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeiface.Connection,
 	chatService appchat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) *ChatHandler {
 	return &ChatHandler{
 		manager:     manager,

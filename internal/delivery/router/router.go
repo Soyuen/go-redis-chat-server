@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(manager realtimeiface.ChatChannelManager,
+func NewRouter(manager realtimeiface.ChannelManager,
 	connection realtimeiface.Connection,
 	chatService chat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) *gin.Engine {
 	gin.SetMode(gin.DebugMode)
@@ -20,7 +20,7 @@ func NewRouter(manager realtimeiface.ChatChannelManager,
 
 	return r
 }
-func registerChatRoutes(r *gin.Engine, manager realtimeiface.ChatChannelManager,
+func registerChatRoutes(r *gin.Engine, manager realtimeiface.ChannelManager,
 	connection realtimeiface.Connection,
 	chatService chat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) {
 	chatHandler := handler.NewChatHandler(manager, connection, chatService, presenter, logger)

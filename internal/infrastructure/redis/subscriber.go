@@ -12,12 +12,12 @@ var _ realtimeiface.ChannelEventSubscriber = (*RedisSubscriber)(nil)
 
 type RedisSubscriber struct {
 	pubsub         pubsub.PubSub
-	channelManager realtimeiface.ChatChannelManager
+	channelManager realtimeiface.ChannelManager
 	cancelFuncs    map[string]context.CancelFunc
 	logger         loggeriface.Logger
 }
 
-func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChatChannelManager,
+func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChannelManager,
 	logger loggeriface.Logger,
 ) *RedisSubscriber {
 	return &RedisSubscriber{
