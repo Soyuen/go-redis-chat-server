@@ -142,3 +142,33 @@ func TestClient_ReadPump_TriggersOnMessage(t *testing.T) {
 		t.Fatal("timeout: onMessage not triggered")
 	}
 }
+
+func TestClient_ReadPump_ReturnsErrorOnUnexpectedFailure(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockLogger := logmock.NewMockLogger(ctrl)
+	// Allow Errorw and Infow methods to be called without failing
+	mockLogger.EXPECT().Errorw(gomock.Any(), gomock.Any()).AnyTimes()
+	mockLogger.EXPECT().Infow(gomock.Any(), gomock.Any()).AnyTimes()
+
+	// Simulate a non-EOF error
+	conn := &mockConn{
+		readMessageFunc: func() (int, []byte, error) {
+			return 0, nil, errors.New("unexpected error")
+		},
+	}
+
+	client := &Client{
+		conn:   conn,
+		logger: mockLogger,
+		send:   make(chan []byte, 1),
+	}
+
+	err := client.ReadPump(func(data []byte) {
+		t.Fatal("onMessage should not be triggered on error")
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "unexpected error")
+}
