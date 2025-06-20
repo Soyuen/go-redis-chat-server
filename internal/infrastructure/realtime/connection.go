@@ -6,12 +6,12 @@ import (
 )
 
 type Connection struct {
-	manager       *ChannelManager
+	manager       realtimeiface.ChannelManager
 	logger        loggeriface.Logger
 	clientFactory *ClientFactory
 }
 
-func NewConnection(m *ChannelManager, logger loggeriface.Logger, clientFactory *ClientFactory) *Connection {
+func NewConnection(m realtimeiface.ChannelManager, logger loggeriface.Logger, clientFactory *ClientFactory) *Connection {
 	return &Connection{
 		manager:       m,
 		logger:        logger,
