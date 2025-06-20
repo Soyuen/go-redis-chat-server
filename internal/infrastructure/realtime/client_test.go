@@ -64,6 +64,16 @@ func TestClient_Send_Close(t *testing.T) {
 	client.Send([]byte("msg1"))
 	client.Send([]byte("msg2")) // The second call should trigger Close()
 
+	client.Close()
+}
+
+func TestClient_Close_Idempotent(t *testing.T) {
+	client := &Client{
+		conn:   &mockConn{writeChan: make(chan []byte, 1)},
+		send:   make(chan []byte, 1),
+		logger: logmock.NewMockLogger(gomock.NewController(t)),
+	}
+
 	// Calling Close multiple times should not panic
 	client.Close()
 	client.Close()
