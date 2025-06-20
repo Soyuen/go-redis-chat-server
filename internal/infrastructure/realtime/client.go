@@ -27,7 +27,7 @@ func NewClientFactory(logger loggeriface.Logger) *ClientFactory {
 	}
 }
 
-func (f *ClientFactory) New(conn realtimeiface.WSConn) *Client {
+func (f *ClientFactory) New(conn realtimeiface.WSConn) realtimeiface.Client {
 	return &Client{
 		conn:   conn,
 		logger: f.logger,

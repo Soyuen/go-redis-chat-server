@@ -8,10 +8,10 @@ import (
 type Connection struct {
 	manager       realtimeiface.ChannelManager
 	logger        loggeriface.Logger
-	clientFactory *ClientFactory
+	clientFactory realtimeiface.ClientFactory
 }
 
-func NewConnection(m realtimeiface.ChannelManager, logger loggeriface.Logger, clientFactory *ClientFactory) *Connection {
+func NewConnection(m realtimeiface.ChannelManager, logger loggeriface.Logger, clientFactory realtimeiface.ClientFactory) *Connection {
 	return &Connection{
 		manager:       m,
 		logger:        logger,
