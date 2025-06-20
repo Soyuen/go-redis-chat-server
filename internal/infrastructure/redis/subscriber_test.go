@@ -119,3 +119,28 @@ func TestRedisSubscriber_Start_LogsFatalOnReceiveError(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	subscriber.Stop()
 }
+
+func TestRedisSubscriber_Start_LogsFatalOnSubscribeError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPubSub := pubsubmock.NewMockPubSub(ctrl)
+	mockChannelManager := realtimemock.NewMockChannelManager(ctrl)
+	mockLogger := loggermock.NewMockLogger(ctrl)
+
+	subscribeErr := fmt.Errorf("subscribe failed")
+
+	mockPubSub.EXPECT().
+		Subscribe(gomock.Any(), "room").
+		Return(nil, subscribeErr)
+
+	mockLogger.EXPECT().
+		Fatalw("[RedisSubscriber] subscribe error", "channel", "room", "error", subscribeErr)
+
+	subscriber := redis.NewRedisSubscriber(mockPubSub, mockChannelManager, mockLogger)
+	subscriber.Start("room")
+
+	time.Sleep(10 * time.Millisecond)
+
+	subscriber.Stop()
+}
