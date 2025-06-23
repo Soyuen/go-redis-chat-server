@@ -8,21 +8,32 @@ import (
 	"time"
 
 	logmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
 
-// mock websocket.Conn with minimal interface
+// Improved mockConn to support simulating multiple messages
 type mockConn struct {
 	writeChan       chan []byte
-	readMessageFunc func() (int, []byte, error)
-	closeOnce       sync.Once
+	messages        [][]byte
+	readIndex       int
 	closed          bool
+	closeOnce       sync.Once
+	readMessageFunc func() (int, []byte, error)
 }
 
 func (m *mockConn) ReadMessage() (int, []byte, error) {
-	return m.readMessageFunc()
+	if m.readMessageFunc != nil {
+		return m.readMessageFunc()
+	}
+	if m.readIndex >= len(m.messages) {
+		return 0, nil, io.EOF
+	}
+	msg := m.messages[m.readIndex]
+	m.readIndex++
+	return websocket.TextMessage, msg, nil
 }
 
 func (m *mockConn) WriteMessage(messageType int, data []byte) error {
@@ -41,32 +52,41 @@ func (m *mockConn) Close() error {
 	return nil
 }
 
-func TestClient_Send_Close(t *testing.T) {
+// Test Send successfully writes to the channel
+func TestClient_Send_WritesToChannel(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	client := &Client{
+		conn:   &mockConn{writeChan: make(chan []byte, 1)},
+		send:   make(chan []byte, 1),
+		logger: logmock.NewMockLogger(ctrl),
+	}
+
+	client.Send([]byte(testhelper.MessageTest))
+	assert.Equal(t, 1, len(client.send))
+}
+
+// Test Send closes the client when the channel is full
+func TestClient_Send_ClosesClientWhenChannelFull(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockLogger := logmock.NewMockLogger(ctrl)
-
 	conn := &mockConn{writeChan: make(chan []byte, 1)}
 
 	client := &Client{
 		conn:   conn,
-		logger: mockLogger,
 		send:   make(chan []byte, 1),
+		logger: mockLogger,
 	}
 
-	// Send should successfully write to the channel
-	client.Send([]byte("hello"))
-	assert.Equal(t, 1, len(client.send))
-
-	// When the channel is full, Send should close the client
-	client.send = make(chan []byte, 1)
-	client.Send([]byte("msg1"))
-	client.Send([]byte("msg2")) // The second call should trigger Close()
-
-	client.Close()
+	client.Send([]byte(testhelper.MessageTest))
+	client.Send([]byte(testhelper.MessageHello)) // Should close the client when channel is full
+	assert.True(t, conn.closed)
 }
 
+// Test Close is safe to call multiple times
 func TestClient_Close_Idempotent(t *testing.T) {
 	client := &Client{
 		conn:   &mockConn{writeChan: make(chan []byte, 1)},
@@ -74,82 +94,66 @@ func TestClient_Close_Idempotent(t *testing.T) {
 		logger: logmock.NewMockLogger(gomock.NewController(t)),
 	}
 
-	// Calling Close multiple times should not panic
 	client.Close()
 	client.Close()
 }
 
-func TestClient_WritePump(t *testing.T) {
+// Test WritePump successfully writes to the connection
+func TestClient_WritePump_WritesMessage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockLogger := logmock.NewMockLogger(ctrl)
 	conn := &mockConn{writeChan: make(chan []byte, 1)}
-
 	client := &Client{
 		conn:   conn,
-		logger: mockLogger,
 		send:   make(chan []byte, 1),
+		logger: logmock.NewMockLogger(ctrl),
 	}
 
-	// Write a single message
-	client.send <- []byte("test message")
-
-	// Start WritePump (runs in a goroutine)
+	client.send <- []byte(testhelper.MessageTest)
 	go client.WritePump()
 
-	// Receive message from mockConn's writeChan
 	select {
 	case msg := <-conn.writeChan:
-		assert.Equal(t, "test message", string(msg))
+		assert.Equal(t, testhelper.MessageTest, string(msg))
 	case <-time.After(time.Second):
 		t.Fatal("timeout waiting for WritePump to write message")
 	}
 }
 
-// Verify that onMessage is called when a message is received.
+// Test ReadPump calls onMessage when a message is received
 func TestClient_ReadPump_TriggersOnMessage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockLogger := logmock.NewMockLogger(ctrl)
-	// Allow Errorw and Infow methods to be called without failing
 	mockLogger.EXPECT().Errorw(gomock.Any(), gomock.Any()).AnyTimes()
 	mockLogger.EXPECT().Infow(gomock.Any(), gomock.Any()).AnyTimes()
 
-	calls := 0
 	conn := &mockConn{
-		readMessageFunc: func() (int, []byte, error) {
-			if calls == 0 {
-				calls++
-				return websocket.TextMessage, []byte("hello"), nil
-			}
-			return 0, nil, io.EOF // ReadPump exits upon receiving EOF.
-		},
+		messages:  [][]byte{[]byte(testhelper.MessageTest)},
+		writeChan: make(chan []byte, 1),
 	}
 
 	client := &Client{
 		conn:   conn,
-		logger: mockLogger,
 		send:   make(chan []byte, 1),
+		logger: mockLogger,
 	}
 
-	messageHandled := make(chan struct{})
-
+	done := make(chan struct{})
 	go func() {
 		err := client.ReadPump(func(data []byte) {
-			assert.Equal(t, "hello", string(data))
-			close(messageHandled)
+			assert.Equal(t, testhelper.MessageTest, string(data))
+			close(done)
 		})
-		// ReadPump is expected to exit due to io.EOF
 		assert.ErrorIs(t, err, io.EOF)
 	}()
 
 	select {
-	case <-messageHandled:
-		// success
+	case <-done:
 	case <-time.After(time.Second):
-		t.Fatal("timeout: onMessage not triggered")
+		t.Fatal("onMessage not triggered")
 	}
 }
 
@@ -158,24 +162,28 @@ func TestClient_ReadPump_ReturnsErrorOnUnexpectedFailure(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockLogger := logmock.NewMockLogger(ctrl)
-	// Allow Errorw and Infow methods to be called without failing
 	mockLogger.EXPECT().Errorw(gomock.Any(), gomock.Any()).AnyTimes()
 	mockLogger.EXPECT().Infow(gomock.Any(), gomock.Any()).AnyTimes()
 
-	// Simulate a non-EOF error
+	called := false
 	conn := &mockConn{
 		readMessageFunc: func() (int, []byte, error) {
-			return 0, nil, errors.New("unexpected error")
+			if !called {
+				called = true
+				return 0, nil, errors.New("unexpected error")
+			}
+			return 0, nil, io.EOF
 		},
+		writeChan: make(chan []byte, 1),
 	}
 
 	client := &Client{
 		conn:   conn,
-		logger: mockLogger,
 		send:   make(chan []byte, 1),
+		logger: mockLogger,
 	}
 
-	err := client.ReadPump(func(data []byte) {
+	err := client.ReadPump(func([]byte) {
 		t.Fatal("onMessage should not be triggered on error")
 	})
 

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -14,18 +15,18 @@ func TestChannelManager_GetOrCreateChannel_ReturnsExisting(t *testing.T) {
 	defer ctrl.Finish()
 	b := mocks.NewMockBroadcaster(ctrl)
 	cm := NewChannelManager()
-	cm.channels["test"] = b
+	cm.channels[testhelper.ChannelTest] = b
 
-	got := cm.GetOrCreateChannel("test")
+	got := cm.GetOrCreateChannel(testhelper.ChannelTest)
 	assert.Equal(t, b, got)
 }
 
 func TestChannelManager_GetOrCreateChannel_CreatesNew(t *testing.T) {
 	cm := NewChannelManager()
 
-	got := cm.GetOrCreateChannel("new")
+	got := cm.GetOrCreateChannel(testhelper.ChannelTest)
 	assert.NotNil(t, got)
-	assert.Contains(t, cm.channels, "new")
+	assert.Contains(t, cm.channels, testhelper.ChannelTest)
 }
 
 func TestChannelManager_Broadcast(t *testing.T) {
@@ -34,9 +35,12 @@ func TestChannelManager_Broadcast(t *testing.T) {
 
 	b := mocks.NewMockBroadcaster(ctrl)
 	cm := NewChannelManager()
-	cm.channels["room"] = b
+	cm.channels[testhelper.ChannelTest] = b
 
-	msg := realtimeiface.Message{Channel: "room", Data: []byte("hi")}
+	msg := realtimeiface.Message{
+		Channel: testhelper.ChannelTest,
+		Data:    []byte(testhelper.MessageTest),
+	}
 
 	b.EXPECT().Broadcast(gomock.Any()).Times(1)
 
@@ -49,12 +53,12 @@ func TestChannelManager_CloseChannel(t *testing.T) {
 
 	b := mocks.NewMockBroadcaster(ctrl)
 	cm := NewChannelManager()
-	cm.channels["test"] = b
+	cm.channels[testhelper.ChannelTest] = b
 
 	b.EXPECT().CloseAllClients().Times(1)
 
-	cm.CloseChannel("test")
-	assert.NotContains(t, cm.channels, "test")
+	cm.CloseChannel(testhelper.ChannelTest)
+	assert.NotContains(t, cm.channels, testhelper.ChannelTest)
 }
 
 func TestChannelManager_CloseAllChannels(t *testing.T) {
@@ -65,12 +69,14 @@ func TestChannelManager_CloseAllChannels(t *testing.T) {
 	b2 := mocks.NewMockBroadcaster(ctrl)
 
 	cm := NewChannelManager()
-	cm.channels["a"] = b1
-	cm.channels["b"] = b2
+
+	cm.channels[testhelper.ChannelTest] = b1
+	cm.channels[testhelper.ChannelGeneral] = b2
 
 	b1.EXPECT().CloseAllClients().Times(1)
 	b2.EXPECT().CloseAllClients().Times(1)
 
 	cm.CloseAllChannels()
+
 	assert.Empty(t, cm.channels)
 }

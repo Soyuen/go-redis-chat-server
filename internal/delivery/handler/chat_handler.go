@@ -17,12 +17,12 @@ type ChatHandler struct {
 	connection  realtimeiface.Connection
 	chatService appchat.ChatService
 	upgrader    websocket.Upgrader
-	presenter   presenter.MessagePresenter
+	presenter   presenter.MessagePresenterInterface
 	logger      loggeriface.Logger
 }
 
 func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeiface.Connection,
-	chatService appchat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) *ChatHandler {
+	chatService appchat.ChatService, presenter presenter.MessagePresenterInterface, logger loggeriface.Logger) *ChatHandler {
 	return &ChatHandler{
 		manager:     manager,
 		connection:  connection,

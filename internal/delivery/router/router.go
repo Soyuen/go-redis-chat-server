@@ -12,7 +12,7 @@ import (
 
 func NewRouter(manager realtimeiface.ChannelManager,
 	connection realtimeiface.Connection,
-	chatService chat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) *gin.Engine {
+	chatService chat.ChatService, presenter presenter.MessagePresenterInterface, logger loggeriface.Logger) *gin.Engine {
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 
@@ -22,7 +22,7 @@ func NewRouter(manager realtimeiface.ChannelManager,
 }
 func registerChatRoutes(r *gin.Engine, manager realtimeiface.ChannelManager,
 	connection realtimeiface.Connection,
-	chatService chat.ChatService, presenter presenter.MessagePresenter, logger loggeriface.Logger) {
+	chatService chat.ChatService, presenter presenter.MessagePresenterInterface, logger loggeriface.Logger) {
 	chatHandler := handler.NewChatHandler(manager, connection, chatService, presenter, logger)
 	chatGroup := r.Group("/chat")
 	chatGroup.GET("/join", chatHandler.JoinChannel)

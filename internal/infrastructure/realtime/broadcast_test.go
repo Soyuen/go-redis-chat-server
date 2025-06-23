@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +48,7 @@ func TestBroadcaster_Broadcast(t *testing.T) {
 	b.Register(mockClient2)
 
 	// Expect both clients to receive the same message
-	message := []byte("test message")
+	message := []byte(testhelper.MessageTest)
 	mockClient1.EXPECT().Send(message).Times(1)
 	mockClient2.EXPECT().Send(message).Times(1)
 
@@ -75,7 +76,7 @@ func TestBroadcaster_CloseAllClients(t *testing.T) {
 func TestBroadcaster_Broadcast_NoClients(t *testing.T) {
 	b := NewBroadcaster().(*BroadcasterImpl)
 	//Calling with no clients should not panic.
-	b.Broadcast([]byte("hello"))
+	b.Broadcast([]byte(testhelper.MessageTest))
 }
 
 func TestBroadcaster_Unregister_NonExistentClient(t *testing.T) {
