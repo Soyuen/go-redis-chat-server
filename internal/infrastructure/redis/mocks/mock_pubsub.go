@@ -64,6 +64,24 @@ func (mr *MockSubscriptionMockRecorder) Receive(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Receive", reflect.TypeOf((*MockSubscription)(nil).Receive), ctx)
 }
 
+// Unsubscribe mocks base method.
+func (m *MockSubscription) Unsubscribe(channels ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range channels {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Unsubscribe", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Unsubscribe indicates an expected call of Unsubscribe.
+func (mr *MockSubscriptionMockRecorder) Unsubscribe(channels ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unsubscribe", reflect.TypeOf((*MockSubscription)(nil).Unsubscribe), channels...)
+}
+
 // MockPubSub is a mock of PubSub interface.
 type MockPubSub struct {
 	ctrl     *gomock.Controller

@@ -10,6 +10,7 @@ type Message struct {
 
 type Subscription interface {
 	Receive(ctx context.Context) (*Message, error)
+	Unsubscribe(channels ...string) error
 	Close() error
 }
 
