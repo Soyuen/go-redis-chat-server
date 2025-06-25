@@ -78,7 +78,7 @@ This is a list of potential improvements. Some may be implemented in the future.
 
 - [x] Add system messages for user join/leave events
 - [x] Graceful shutdown
-- [ ] Unit test
+- [x] Unit test
 - [ ] Display number of users in each channel
 - [ ] Set password for joining a channel
 - [ ] Name validation mechanism  
