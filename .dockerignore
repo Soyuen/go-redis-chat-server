@@ -1,0 +1,41 @@
+# Git version control folder and ignore rules - no need in build context
+.git
+.gitignore
+
+# Go build artifacts and test files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Dependency directory (uncomment if you use vendor directory)
+vendor/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Environment variable files - avoid including sensitive info
+.env
+
+# Log directories and files
+logs/
+*.log
+
+# Editor configuration directories
+.idea/
+.vscode/
+
+# Linter configuration
+.golangci.yml
+
+# Other temporary files
+*.tmp
+*.swp
+*.bak
