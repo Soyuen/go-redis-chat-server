@@ -9,11 +9,15 @@ import (
 	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
+type MessagePresenterInterface interface {
+	Format(msg *chat.Message) *realtimeiface.Message
+}
+
 type MessagePresenter struct {
 	logger loggeriface.Logger
 }
 
-func NewMessagePresenter(logger loggeriface.Logger) *MessagePresenter {
+func NewMessagePresenter(logger loggeriface.Logger) MessagePresenterInterface {
 	return &MessagePresenter{logger: logger}
 }
 

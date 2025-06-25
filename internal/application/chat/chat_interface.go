@@ -1,11 +1,9 @@
 package chat
 
-type MessageProcessor interface {
-	ProcessIncoming(raw []byte, username string, channel string) (*Message, error)
-}
+import domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 
-type Message struct {
-	Channel string
-	Sender  string
-	Content string
+type ChatService interface {
+	ProcessIncoming(raw []byte, sender, channel string) (*domainchat.Message, error)
+	CreateRoom(roomName string) error
+	BroadcastSystemMessage(channel, nickname, action string) error
 }

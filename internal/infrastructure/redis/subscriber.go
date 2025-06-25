@@ -12,12 +12,12 @@ var _ realtimeiface.ChannelEventSubscriber = (*RedisSubscriber)(nil)
 
 type RedisSubscriber struct {
 	pubsub         pubsub.PubSub
-	channelManager realtimeiface.ChatChannelManager
+	channelManager realtimeiface.ChannelManager
 	cancelFuncs    map[string]context.CancelFunc
 	logger         loggeriface.Logger
 }
 
-func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChatChannelManager,
+func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChannelManager,
 	logger loggeriface.Logger,
 ) *RedisSubscriber {
 	return &RedisSubscriber{
@@ -47,9 +47,13 @@ func (s *RedisSubscriber) Start(channel string) {
 		for {
 			msg, err := sub.Receive(ctx)
 			if err != nil {
+				if err == context.Canceled || err == context.DeadlineExceeded {
+					return
+				}
 				s.logger.Fatalw("[RedisSubscriber] receive error", "channel", channel, "error", err)
-				break
+				return
 			}
+
 			s.channelManager.Broadcast(realtimeiface.Message{
 				Channel: msg.Channel,
 				Data:    msg.Payload,

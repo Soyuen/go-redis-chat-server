@@ -11,7 +11,7 @@ import (
 var _ realtimeiface.Client = (*Client)(nil)
 
 type Client struct {
-	conn      *websocket.Conn
+	conn      realtimeiface.WSConn
 	send      chan []byte
 	logger    loggeriface.Logger
 	closeOnce sync.Once
@@ -27,7 +27,7 @@ func NewClientFactory(logger loggeriface.Logger) *ClientFactory {
 	}
 }
 
-func (f *ClientFactory) New(conn *websocket.Conn) *Client {
+func (f *ClientFactory) New(conn realtimeiface.WSConn) realtimeiface.Client {
 	return &Client{
 		conn:   conn,
 		logger: f.logger,
@@ -60,7 +60,12 @@ func (c *Client) ReadPump(onMessage func([]byte)) error {
 
 func (c *Client) WritePump() {
 	for msg := range c.send {
-		c.conn.WriteMessage(websocket.TextMessage, msg)
+		err := c.conn.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			c.logger.Errorw("write message failed", "error", err)
+			_ = c.conn.Close()
+			break
+		}
 	}
 }
 
