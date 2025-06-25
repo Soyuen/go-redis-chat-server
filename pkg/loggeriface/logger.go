@@ -6,4 +6,5 @@ type Logger interface {
 	Errorw(msg string, keysAndValues ...interface{})
 	Debugw(msg string, keysAndValues ...interface{})
 	Fatalw(msg string, keysAndValues ...interface{})
+	Sync() error
 }

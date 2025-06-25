@@ -6,3 +6,7 @@ type Client interface {
 	WritePump()
 	Close()
 }
+
+type ClientFactory interface {
+	New(conn WSConn) Client
+}

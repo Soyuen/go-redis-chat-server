@@ -21,7 +21,7 @@ type AppDependencies struct {
 	Subscriber     *appredis.RedisSubscriber
 	Connection     *realtime.Connection
 	ChatSvc        chat.ChatService
-	Presenter      *presenter.MessagePresenter
+	Presenter      presenter.MessagePresenterInterface
 }
 
 func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, error) {
@@ -48,7 +48,7 @@ func InitRedisSubscriberService(logger loggeriface.Logger) (*AppDependencies, er
 	clientFactory := realtime.NewClientFactory(logger)
 	connHandler := realtime.NewConnection(manager, logger, clientFactory)
 	presenter := presenter.NewMessagePresenter(logger)
-	chatSvc := chat.NewChatService(manager, subscriber, *presenter)
+	chatSvc := chat.NewChatService(manager, subscriber, presenter)
 
 	// 7. Return all dependencies
 	return &AppDependencies{

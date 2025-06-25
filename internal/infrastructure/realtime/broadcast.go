@@ -26,8 +26,10 @@ func (b *BroadcasterImpl) Register(client realtimeiface.Client) {
 func (b *BroadcasterImpl) Unregister(client realtimeiface.Client) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	delete(b.clients, client)
-	client.Close()
+	if _, exists := b.clients[client]; exists {
+		delete(b.clients, client)
+		client.Close()
+	}
 }
 
 func (b *BroadcasterImpl) Broadcast(message []byte) {

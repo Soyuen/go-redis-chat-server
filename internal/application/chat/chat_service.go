@@ -11,28 +11,27 @@ import (
 	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
-type ChatService interface {
-	CreateRoom(roomName string) error
-	ProcessIncoming(raw []byte, sender, channel string) (*domainchat.Message, error)
-	BroadcastSystemMessage(channel, nickname, action string) error
-}
-
 type chatService struct {
-	channelManager realtimeiface.ChatChannelManager
+	channelManager realtimeiface.ChannelManager
 	redisSub       realtimeiface.ChannelEventSubscriber
-	presenter      presenter.MessagePresenter
+	presenter      presenter.MessagePresenterInterface
+	goFunc         func(func())
 }
 
-func NewChatService(channelManager realtimeiface.ChatChannelManager, redisSub realtimeiface.ChannelEventSubscriber, presenter presenter.MessagePresenter) ChatService {
+func NewChatService(channelManager realtimeiface.ChannelManager, redisSub realtimeiface.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface) ChatService {
 	return &chatService{
 		channelManager: channelManager,
 		redisSub:       redisSub,
+		presenter:      presenter,
+		goFunc:         func(f func()) { go f() },
 	}
 }
 
 func (s *chatService) CreateRoom(roomName string) error {
 	s.channelManager.GetOrCreateChannel(roomName)
-	go s.redisSub.Start(roomName)
+	s.goFunc(func() {
+		s.redisSub.Start(roomName)
+	})
 	return nil
 }
 
