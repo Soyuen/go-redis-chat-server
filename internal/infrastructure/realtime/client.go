@@ -60,7 +60,12 @@ func (c *Client) ReadPump(onMessage func([]byte)) error {
 
 func (c *Client) WritePump() {
 	for msg := range c.send {
-		c.conn.WriteMessage(websocket.TextMessage, msg)
+		err := c.conn.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			c.logger.Errorw("write message failed", "error", err)
+			_ = c.conn.Close()
+			break
+		}
 	}
 }
 

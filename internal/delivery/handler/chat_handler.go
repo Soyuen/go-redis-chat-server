@@ -13,17 +13,18 @@ import (
 )
 
 type ChatHandler struct {
-	manager     realtimeiface.ChannelManager
-	connection  realtimeiface.Connection
-	chatService appchat.ChatService
-	upgrader    websocket.Upgrader
-	presenter   presenter.MessagePresenterInterface
-	logger      loggeriface.Logger
+	manager      realtimeiface.ChannelManager
+	connection   realtimeiface.Connection
+	chatService  appchat.ChatService
+	upgrader     websocket.Upgrader
+	upgraderFunc func(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error)
+	presenter    presenter.MessagePresenterInterface
+	logger       loggeriface.Logger
 }
 
 func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeiface.Connection,
 	chatService appchat.ChatService, presenter presenter.MessagePresenterInterface, logger loggeriface.Logger) *ChatHandler {
-	return &ChatHandler{
+	h := &ChatHandler{
 		manager:     manager,
 		connection:  connection,
 		chatService: chatService,
@@ -38,6 +39,10 @@ func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeifa
 			},
 		},
 	}
+	h.upgraderFunc = func(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+		return h.upgrader.Upgrade(w, r, nil)
+	}
+	return h
 }
 
 func (h *ChatHandler) JoinChannel(c *gin.Context) {
