@@ -4,13 +4,13 @@ package presenter
 import (
 	"encoding/json"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
 type MessagePresenterInterface interface {
-	Format(msg *chat.Message) *realtimeiface.Message
+	Format(msg *chat.Message) *realtime.Message
 }
 
 type MessagePresenter struct {
@@ -21,7 +21,7 @@ func NewMessagePresenter(logger loggeriface.Logger) MessagePresenterInterface {
 	return &MessagePresenter{logger: logger}
 }
 
-func (p *MessagePresenter) Format(msg *chat.Message) *realtimeiface.Message {
+func (p *MessagePresenter) Format(msg *chat.Message) *realtime.Message {
 	messageObj := map[string]string{
 		"sender":  msg.Sender,
 		"message": msg.Content,
@@ -31,7 +31,7 @@ func (p *MessagePresenter) Format(msg *chat.Message) *realtimeiface.Message {
 		p.logger.Warnw("failed to marshal message JSON", "err", err)
 		return nil
 	}
-	return &realtimeiface.Message{
+	return &realtime.Message{
 		Channel: msg.Channel,
 		Data:    jsonBytes,
 	}

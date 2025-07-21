@@ -4,26 +4,26 @@ import (
 	"net/http"
 
 	appchat "github.com/Soyuen/go-redis-chat-server/internal/application/chat"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	apperr "github.com/Soyuen/go-redis-chat-server/internal/errors"
-	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
+	infrarealtime "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 type ChatHandler struct {
-	manager      realtimeiface.ChannelManager
-	connection   realtimeiface.Connection
+	manager      realtime.ChannelManager
+	connection   realtime.Connection
 	chatService  appchat.ChatService
 	upgrader     websocket.Upgrader
-	upgraderFunc func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error)
+	upgraderFunc func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error)
 	presenter    presenter.MessagePresenterInterface
 	logger       loggeriface.Logger
 }
 
-func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeiface.Connection,
+func NewChatHandler(manager realtime.ChannelManager, connection realtime.Connection,
 	chatService appchat.ChatService, presenter presenter.MessagePresenterInterface, logger loggeriface.Logger) *ChatHandler {
 	h := &ChatHandler{
 		manager:     manager,
@@ -39,12 +39,12 @@ func NewChatHandler(manager realtimeiface.ChannelManager, connection realtimeifa
 			},
 		},
 	}
-	h.upgraderFunc = func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error) {
+	h.upgraderFunc = func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error) {
 		conn, err := h.upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return nil, err
 		}
-		return realtime.NewWSConnWrapper(conn), nil
+		return infrarealtime.NewWSConnWrapper(conn), nil
 	}
 	return h
 }
@@ -95,8 +95,8 @@ func (h *ChatHandler) JoinChannel(c *gin.Context) {
 
 }
 
-func (h *ChatHandler) messageHandler(channel, nickname string) func(raw []byte) *realtimeiface.Message {
-	return func(raw []byte) *realtimeiface.Message {
+func (h *ChatHandler) messageHandler(channel, nickname string) func(raw []byte) *realtime.Message {
+	return func(raw []byte) *realtime.Message {
 		dmsg, err := h.chatService.ProcessIncoming(raw, nickname, channel)
 		if err != nil {
 			h.logger.Warnw("failed to parse message", "err", err)
@@ -115,6 +115,6 @@ func (h *ChatHandler) leaveHandler(channel, nickname string) func() {
 }
 
 // for testing
-func (h *ChatHandler) SetUpgraderFunc(f func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error)) {
+func (h *ChatHandler) SetUpgraderFunc(f func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error)) {
 	h.upgraderFunc = f
 }

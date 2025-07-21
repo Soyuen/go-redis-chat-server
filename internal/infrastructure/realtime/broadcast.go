@@ -3,27 +3,27 @@ package realtime
 import (
 	"sync"
 
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 )
 
 type BroadcasterImpl struct {
 	mu      sync.RWMutex
-	clients map[realtimeiface.Client]bool
+	clients map[realtime.Client]bool
 }
 
-func NewBroadcaster() realtimeiface.Broadcaster {
+func NewBroadcaster() realtime.Broadcaster {
 	return &BroadcasterImpl{
-		clients: make(map[realtimeiface.Client]bool),
+		clients: make(map[realtime.Client]bool),
 	}
 }
 
-func (b *BroadcasterImpl) Register(client realtimeiface.Client) {
+func (b *BroadcasterImpl) Register(client realtime.Client) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.clients[client] = true
 }
 
-func (b *BroadcasterImpl) Unregister(client realtimeiface.Client) {
+func (b *BroadcasterImpl) Unregister(client realtime.Client) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if _, exists := b.clients[client]; exists {

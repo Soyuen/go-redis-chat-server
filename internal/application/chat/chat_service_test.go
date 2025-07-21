@@ -9,7 +9,7 @@ import (
 	presentermock "github.com/Soyuen/go-redis-chat-server/internal/presenter/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -60,7 +60,7 @@ func TestChatService_BroadcastSystemMessage(t *testing.T) {
 	mockSub := redismock.NewMockChannelEventSubscriber(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 
-	mockPresenter.EXPECT().Format(gomock.Any()).Return(&realtimeiface.Message{
+	mockPresenter.EXPECT().Format(gomock.Any()).Return(&realtime.Message{
 		Channel: testhelper.ChannelTest,
 		Data: []byte("{" + testhelper.KeySender + ":" + testhelper.SenderSystem + "," +
 			testhelper.KeyMessage + ":" + testhelper.SenderAlice + testhelper.MessageJoin + "}"),

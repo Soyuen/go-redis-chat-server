@@ -8,7 +8,7 @@ import (
 	logmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/golang/mock/gomock"
 )
 
@@ -62,7 +62,7 @@ func TestConnection_HandleConnection_RegistersClientAndStartsPumps(t *testing.T)
 
 	c := NewConnection(mockManager, mockLogger, mockClientFactory)
 
-	go c.HandleConnection(conn, channel, func(raw []byte) *realtimeiface.Message {
+	go c.HandleConnection(conn, channel, func(raw []byte) *realtime.Message {
 		return nil
 	}, nil)
 
@@ -92,19 +92,19 @@ func TestConnection_HandleConnection_BroadcastsOnMessage(t *testing.T) {
 		return nil
 	})
 
-	mockManager.EXPECT().Broadcast(realtimeiface.Message{
+	mockManager.EXPECT().Broadcast(realtime.Message{
 		Channel: "room1",
 		Data:    rawMsg,
 	})
 
-	mockBroadcaster.EXPECT().Unregister(mockClient).Do(func(_ realtimeiface.Client) {
+	mockBroadcaster.EXPECT().Unregister(mockClient).Do(func(_ realtime.Client) {
 		close(unregisterCalled)
 	})
 	mockClient.EXPECT().Close()
 
 	c := NewConnection(mockManager, mockLogger, mockClientFactory)
-	go c.HandleConnection(conn, channel, func(raw []byte) *realtimeiface.Message {
-		return &realtimeiface.Message{Channel: "room1", Data: raw}
+	go c.HandleConnection(conn, channel, func(raw []byte) *realtime.Message {
+		return &realtime.Message{Channel: "room1", Data: raw}
 	}, nil)
 
 	waitWritePumpCalled(t, writePumpCalled)
@@ -137,7 +137,7 @@ func TestConnection_HandleConnection_UnregistersAndClosesOnError(t *testing.T) {
 
 	c := NewConnection(mockManager, mockLogger, mockClientFactory)
 
-	go c.HandleConnection(conn, channel, func(raw []byte) *realtimeiface.Message {
+	go c.HandleConnection(conn, channel, func(raw []byte) *realtime.Message {
 		return nil
 	}, nil)
 
@@ -175,7 +175,7 @@ func TestConnection_HandleConnection_CallsOnClose(t *testing.T) {
 	}
 
 	c := NewConnection(mockManager, mockLogger, mockClientFactory)
-	go c.HandleConnection(conn, channel, func(raw []byte) *realtimeiface.Message {
+	go c.HandleConnection(conn, channel, func(raw []byte) *realtime.Message {
 		return nil
 	}, onClose)
 

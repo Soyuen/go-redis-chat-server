@@ -1,19 +1,26 @@
 package config
 
-type RedisConfig struct {
+type RedisConfig interface {
+	Host() string
+	Port() int
+	Password() string
+	DB() int
+}
+
+type RedisConfigImpl struct {
 	HostVal     string
 	PortVal     int
 	PasswordVal string
 	DBVal       int
 }
 
-func (c RedisConfig) Host() string     { return c.HostVal }
-func (c RedisConfig) Port() int        { return c.PortVal }
-func (c RedisConfig) Password() string { return c.PasswordVal }
-func (c RedisConfig) DB() int          { return c.DBVal }
+func (c RedisConfigImpl) Host() string     { return c.HostVal }
+func (c RedisConfigImpl) Port() int        { return c.PortVal }
+func (c RedisConfigImpl) Password() string { return c.PasswordVal }
+func (c RedisConfigImpl) DB() int          { return c.DBVal }
 
 func LoadRedisConfigFromEnv() RedisConfig {
-	return RedisConfig{
+	return RedisConfigImpl{
 		HostVal:     GetEnv("REDIS_HOST", "localhost"),
 		PortVal:     GetEnvAsInt("REDIS_PORT", 6379),
 		PasswordVal: GetEnv("REDIS_PASSWORD", ""),

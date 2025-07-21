@@ -1,17 +1,17 @@
 package realtime
 
 import (
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
 type Connection struct {
-	manager       realtimeiface.ChannelManager
+	manager       realtime.ChannelManager
 	logger        loggeriface.Logger
-	clientFactory realtimeiface.ClientFactory
+	clientFactory realtime.ClientFactory
 }
 
-func NewConnection(m realtimeiface.ChannelManager, logger loggeriface.Logger, clientFactory realtimeiface.ClientFactory) *Connection {
+func NewConnection(m realtime.ChannelManager, logger loggeriface.Logger, clientFactory realtime.ClientFactory) *Connection {
 	return &Connection{
 		manager:       m,
 		logger:        logger,
@@ -20,12 +20,12 @@ func NewConnection(m realtimeiface.ChannelManager, logger loggeriface.Logger, cl
 }
 
 // 確保 Connection 有實作 interface
-var _ realtimeiface.Connection = (*Connection)(nil)
+var _ realtime.Connection = (*Connection)(nil)
 
 func (h *Connection) HandleConnection(
-	conn realtimeiface.WSConn,
+	conn realtime.WSConn,
 	channel string,
-	onMessage func(raw []byte) *realtimeiface.Message,
+	onMessage func(raw []byte) *realtime.Message,
 	onClose func(),
 ) {
 	client := h.clientFactory.New(conn)
@@ -37,7 +37,7 @@ func (h *Connection) HandleConnection(
 	h.handleRead(client, b, onMessage, onClose)
 }
 
-func (h *Connection) handleWrite(client realtimeiface.Client) {
+func (h *Connection) handleWrite(client realtime.Client) {
 	defer func() {
 		if r := recover(); r != nil {
 			h.logger.Errorw("Recovered from panic in WritePump", "error", r)
@@ -47,9 +47,9 @@ func (h *Connection) handleWrite(client realtimeiface.Client) {
 }
 
 func (h *Connection) handleRead(
-	client realtimeiface.Client,
-	b realtimeiface.Broadcaster,
-	onMessage func(raw []byte) *realtimeiface.Message,
+	client realtime.Client,
+	b realtime.Broadcaster,
+	onMessage func(raw []byte) *realtime.Message,
 	onClose func(),
 ) {
 	defer func() {

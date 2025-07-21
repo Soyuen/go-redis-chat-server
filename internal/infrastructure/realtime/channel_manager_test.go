@@ -3,9 +3,9 @@ package realtime
 import (
 	"testing"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,7 @@ func TestChannelManager_Broadcast(t *testing.T) {
 	cm := NewChannelManager()
 	cm.channels[testhelper.ChannelTest] = b
 
-	msg := realtimeiface.Message{
+	msg := realtime.Message{
 		Channel: testhelper.ChannelTest,
 		Data:    []byte(testhelper.MessageTest),
 	}
