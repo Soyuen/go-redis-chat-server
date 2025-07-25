@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
 	"github.com/redis/go-redis/v9"
 )
 
