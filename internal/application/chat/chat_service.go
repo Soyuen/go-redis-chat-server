@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
-
-	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 )
 
 type chatService struct {

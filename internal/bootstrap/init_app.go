@@ -3,11 +3,12 @@ package bootstrap
 import (
 	"fmt"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/cache"
 	"github.com/Soyuen/go-redis-chat-server/internal/application/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
 	"github.com/Soyuen/go-redis-chat-server/internal/config"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
-	appredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
+	infraredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 	"github.com/redis/go-redis/v9"
@@ -15,10 +16,10 @@ import (
 
 type AppDependencies struct {
 	RedisClient    *redis.Client
-	RedisCache     *appredis.RedisAdapter
+	RedisCache     cache.RedisCache
 	RedisPubSub    pubsub.PubSub
 	ChannelManager *realtime.ChannelManager
-	Subscriber     *appredis.RedisSubscriber
+	Subscriber     *infraredis.RedisSubscriber
 	Connection     *realtime.Connection
 	ChatSvc        chat.ChatService
 	Presenter      presenter.MessagePresenterInterface
@@ -28,20 +29,20 @@ func LoadRedisConfig() config.RedisConfig {
 	return config.LoadRedisConfigFromEnv()
 }
 
-func InitRedisAdapter(cfg config.RedisConfig) (*appredis.RedisAdapter, error) {
-	return appredis.NewRedisAdapter(cfg)
+func InitRedisAdapter(cfg config.RedisConfig) (*infraredis.RedisAdapter, error) {
+	return infraredis.NewRedisAdapter(cfg)
 }
 
 func InitRedisPubSub(client *redis.Client) pubsub.PubSub {
-	return appredis.NewRedisPubSubAdapter(client)
+	return infraredis.NewRedisPubSubAdapter(client)
 }
 
 func InitChannelManager() *realtime.ChannelManager {
 	return realtime.NewChannelManager()
 }
 
-func InitSubscriber(pubsub pubsub.PubSub, manager *realtime.ChannelManager, logger loggeriface.Logger) *appredis.RedisSubscriber {
-	return appredis.NewRedisSubscriber(pubsub, manager, logger)
+func InitSubscriber(pubsub pubsub.PubSub, manager *realtime.ChannelManager, logger loggeriface.Logger) *infraredis.RedisSubscriber {
+	return infraredis.NewRedisSubscriber(pubsub, manager, logger)
 }
 
 func InitConnectionHandler(manager *realtime.ChannelManager, logger loggeriface.Logger) *realtime.Connection {
@@ -53,7 +54,7 @@ func InitPresenter(logger loggeriface.Logger) presenter.MessagePresenterInterfac
 	return presenter.NewMessagePresenter(logger)
 }
 
-func InitChatService(manager *realtime.ChannelManager, subscriber *appredis.RedisSubscriber, presenter presenter.MessagePresenterInterface) chat.ChatService {
+func InitChatService(manager *realtime.ChannelManager, subscriber *infraredis.RedisSubscriber, presenter presenter.MessagePresenterInterface) chat.ChatService {
 	return chat.NewChatService(manager, subscriber, presenter)
 }
 

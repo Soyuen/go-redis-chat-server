@@ -8,9 +8,9 @@ import (
 
 	chatmock "github.com/Soyuen/go-redis-chat-server/internal/application/chat/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
+	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	logmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
-	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 	presentermock "github.com/Soyuen/go-redis-chat-server/internal/presenter/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 

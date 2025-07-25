@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	logmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
-	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 
 	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/golang/mock/gomock"

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
+	pubsubmock "github.com/Soyuen/go-redis-chat-server/internal/application/pubsub/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
+	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	loggermock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
-	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
-	pubsubmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis/mocks"
 
 	"github.com/golang/mock/gomock"
 )

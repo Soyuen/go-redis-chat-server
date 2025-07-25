@@ -1,5 +1,5 @@
 // internal/application/cache/ports.go
-package application
+package cache
 
 import "context"
 

@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
-	redismock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis/mocks"
+	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	presentermock "github.com/Soyuen/go-redis-chat-server/internal/presenter/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 
@@ -19,9 +18,8 @@ func TestChatService_CreateRoom(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockCM := realtimemock.NewMockChannelManager(ctrl)
-	mockSub := redismock.NewMockChannelEventSubscriber(ctrl)
+	mockSub := realtimemock.NewMockChannelEventSubscriber(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
-
 	mockCM.EXPECT().GetOrCreateChannel(testhelper.ChannelTest).Times(1)
 	mockSub.EXPECT().Start(testhelper.ChannelTest).Times(1)
 
@@ -57,7 +55,7 @@ func TestChatService_BroadcastSystemMessage(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockCM := realtimemock.NewMockChannelManager(ctrl)
-	mockSub := redismock.NewMockChannelEventSubscriber(ctrl)
+	mockSub := realtimemock.NewMockChannelEventSubscriber(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 
 	mockPresenter.EXPECT().Format(gomock.Any()).Return(&realtime.Message{

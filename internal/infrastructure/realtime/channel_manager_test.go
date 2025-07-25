@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
-	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
