@@ -1,6 +1,8 @@
 package chat
 
-import domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
+import (
+	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
+)
 
 type ChatService interface {
 	ProcessIncoming(raw []byte, sender, channel string) (*domainchat.Message, error)

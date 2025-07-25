@@ -5,20 +5,19 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
-
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
 type chatService struct {
-	channelManager realtimeiface.ChannelManager
-	redisSub       realtimeiface.ChannelEventSubscriber
+	channelManager realtime.ChannelManager
+	redisSub       realtime.ChannelEventSubscriber
 	presenter      presenter.MessagePresenterInterface
 	goFunc         func(func())
 }
 
-func NewChatService(channelManager realtimeiface.ChannelManager, redisSub realtimeiface.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface) ChatService {
+func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface) ChatService {
 	return &chatService{
 		channelManager: channelManager,
 		redisSub:       redisSub,

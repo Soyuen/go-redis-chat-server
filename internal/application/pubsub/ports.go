@@ -1,4 +1,4 @@
-// pkg/pubsub/pubsub.go
+// internal/application/pubsub/ports.go
 package pubsub
 
 import "context"

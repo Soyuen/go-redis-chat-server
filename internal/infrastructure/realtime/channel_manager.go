@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 )
 
 type ChannelManager struct {
-	channels map[string]realtimeiface.Broadcaster
+	channels map[string]realtime.Broadcaster
 	mu       sync.RWMutex
 }
 
 func NewChannelManager() *ChannelManager {
 	return &ChannelManager{
-		channels: make(map[string]realtimeiface.Broadcaster),
+		channels: make(map[string]realtime.Broadcaster),
 	}
 }
 
-func (cm *ChannelManager) GetOrCreateChannel(channel string) realtimeiface.Broadcaster {
+func (cm *ChannelManager) GetOrCreateChannel(channel string) realtime.Broadcaster {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 
@@ -31,7 +31,7 @@ func (cm *ChannelManager) GetOrCreateChannel(channel string) realtimeiface.Broad
 	return b
 }
 
-func (cm *ChannelManager) Broadcast(msg realtimeiface.Message) {
+func (cm *ChannelManager) Broadcast(msg realtime.Message) {
 	data, err := json.Marshal(msg)
 	if err != nil {
 		// TODO: log warning

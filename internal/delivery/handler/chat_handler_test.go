@@ -6,13 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	chatmocks "github.com/Soyuen/go-redis-chat-server/internal/application/chat/mocks"
+	chatmock "github.com/Soyuen/go-redis-chat-server/internal/application/chat/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
+	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	logmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
-	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 	presentermock "github.com/Soyuen/go-redis-chat-server/internal/presenter/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/testhelper"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -25,7 +25,7 @@ func TestChatHandler_JoinChannel_CreateRoomError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockConnection := realtimemock.NewMockConnection(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
@@ -34,7 +34,7 @@ func TestChatHandler_JoinChannel_CreateRoomError(t *testing.T) {
 	handlerChat := NewChatHandler(nil, mockConnection, mockChatService, mockPresenter, mockLogger)
 
 	// Inject a mock upgraderFunc
-	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error) {
+	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error) {
 		return mockWSConn, nil
 	})
 
@@ -61,7 +61,7 @@ func TestChatHandler_JoinChannel_EmptyChannel(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockConnection := realtimemock.NewMockConnection(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
@@ -85,7 +85,7 @@ func TestChatHandler_JoinChannel_UpgradeFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockConnection := realtimemock.NewMockConnection(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
@@ -93,7 +93,7 @@ func TestChatHandler_JoinChannel_UpgradeFail(t *testing.T) {
 	handlerChat := NewChatHandler(nil, mockConnection, mockChatService, mockPresenter, mockLogger)
 
 	// Mock upgraderFunc to return an error, simulating a failed WebSocket upgrade
-	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error) {
+	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error) {
 		return nil, errors.New("upgrade failed")
 	})
 
@@ -113,7 +113,7 @@ func TestChatHandler_JoinChannel_InvalidNickname(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockConnection := realtimemock.NewMockConnection(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
@@ -122,7 +122,7 @@ func TestChatHandler_JoinChannel_InvalidNickname(t *testing.T) {
 
 	// Use a mock WSConn to avoid opening a real WebSocket connection
 	mockWsConn := realtimemock.NewMockWSConn(ctrl)
-	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtimeiface.WSConn, error) {
+	handlerChat.SetUpgraderFunc(func(w http.ResponseWriter, r *http.Request) (realtime.WSConn, error) {
 		return mockWsConn, nil
 	})
 
@@ -146,7 +146,7 @@ func TestChatHandler_MessageHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
 
@@ -164,7 +164,7 @@ func TestChatHandler_MessageHandler(t *testing.T) {
 			Channel: testhelper.ChannelTest,
 			Content: testhelper.MessageHello,
 		}, nil)
-	mockPresenter.EXPECT().Format(gomock.Any()).Return(&realtimeiface.Message{})
+	mockPresenter.EXPECT().Format(gomock.Any()).Return(&realtime.Message{})
 
 	f := handlerChat.messageHandler(channel, nickname)
 	msg := f(raw)
@@ -182,7 +182,7 @@ func TestChatHandler_LeaveHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockChatService := chatmocks.NewMockChatService(ctrl)
+	mockChatService := chatmock.NewMockChatService(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
 
 	handlerChat := NewChatHandler(nil, nil, mockChatService, nil, mockLogger)

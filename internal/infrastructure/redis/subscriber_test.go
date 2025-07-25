@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
+	pubsubmock "github.com/Soyuen/go-redis-chat-server/internal/application/pubsub/mocks"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
+	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/application/realtime/mocks"
 	loggermock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/logger/mocks"
-	realtimemock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime/mocks"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
-	pubsubmock "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis/mocks"
-	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 
 	"github.com/golang/mock/gomock"
 )
@@ -49,7 +49,7 @@ func TestRedisSubscriber_Start_BroadcastsReceivedMessages(t *testing.T) {
 	mockSubscription.EXPECT().Close()
 
 	mockChannelManager.EXPECT().
-		Broadcast(realtimeiface.Message{
+		Broadcast(realtime.Message{
 			Channel: channel,
 			Data:    msgData,
 		})

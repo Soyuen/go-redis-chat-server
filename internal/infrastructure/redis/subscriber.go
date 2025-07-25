@@ -3,21 +3,21 @@ package redis
 import (
 	"context"
 
+	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
-	"github.com/Soyuen/go-redis-chat-server/pkg/pubsub"
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
 )
 
-var _ realtimeiface.ChannelEventSubscriber = (*RedisSubscriber)(nil)
+var _ realtime.ChannelEventSubscriber = (*RedisSubscriber)(nil)
 
 type RedisSubscriber struct {
 	pubsub         pubsub.PubSub
-	channelManager realtimeiface.ChannelManager
+	channelManager realtime.ChannelManager
 	cancelFuncs    map[string]context.CancelFunc
 	logger         loggeriface.Logger
 }
 
-func NewRedisSubscriber(pub pubsub.PubSub, manager realtimeiface.ChannelManager,
+func NewRedisSubscriber(pub pubsub.PubSub, manager realtime.ChannelManager,
 	logger loggeriface.Logger,
 ) *RedisSubscriber {
 	return &RedisSubscriber{
@@ -54,7 +54,7 @@ func (s *RedisSubscriber) Start(channel string) {
 				return
 			}
 
-			s.channelManager.Broadcast(realtimeiface.Message{
+			s.channelManager.Broadcast(realtime.Message{
 				Channel: msg.Channel,
 				Data:    msg.Payload,
 			})

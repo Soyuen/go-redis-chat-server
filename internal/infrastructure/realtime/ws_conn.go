@@ -1,7 +1,7 @@
 package realtime
 
 import (
-	"github.com/Soyuen/go-redis-chat-server/pkg/realtimeiface"
+	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	"github.com/gorilla/websocket"
 )
 
@@ -9,7 +9,7 @@ type WSConnWrapper struct {
 	conn *websocket.Conn
 }
 
-func NewWSConnWrapper(conn *websocket.Conn) realtimeiface.WSConn {
+func NewWSConnWrapper(conn *websocket.Conn) realtime.WSConn {
 	return &WSConnWrapper{
 		conn: conn,
 	}

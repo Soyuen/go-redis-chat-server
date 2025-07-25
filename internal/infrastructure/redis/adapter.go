@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	pkgRedis "github.com/Soyuen/go-redis-chat-server/pkg/redis"
+	"github.com/Soyuen/go-redis-chat-server/internal/config"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -13,7 +13,7 @@ type RedisAdapter struct {
 	client *redis.Client
 }
 
-func NewRedisAdapter(cfg pkgRedis.Config) (*RedisAdapter, error) {
+func NewRedisAdapter(cfg config.RedisConfig) (*RedisAdapter, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host(), cfg.Port()),
 		Password: cfg.Password(),
