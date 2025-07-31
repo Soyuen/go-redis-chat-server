@@ -37,3 +37,24 @@ func (r *RedisAdapter) Get(ctx context.Context, key string) (string, error) {
 func (r *RedisAdapter) Delete(ctx context.Context, key string) error {
 	return r.client.Del(ctx, key).Err()
 }
+
+// ZAdd adds a member with a score to a sorted set.
+func (r *RedisAdapter) ZAdd(ctx context.Context, key, member string, score float64) error {
+	z := &redis.Z{Score: score, Member: member}
+	return r.client.ZAdd(ctx, key, *z).Err()
+}
+
+// ZRem removes a member from a sorted set.
+func (r *RedisAdapter) ZRem(ctx context.Context, key, member string) error {
+	return r.client.ZRem(ctx, key, member).Err()
+}
+
+// ZCard returns the cardinality (number of elements) of the sorted set.
+func (r *RedisAdapter) ZCard(ctx context.Context, key string) (int64, error) {
+	return r.client.ZCard(ctx, key).Result()
+}
+
+// ZRange returns the members in the sorted set within the given range.
+func (r *RedisAdapter) ZRange(ctx context.Context, key string, start, stop int64) ([]string, error) {
+	return r.client.ZRange(ctx, key, start, stop).Result()
+}
