@@ -3,7 +3,7 @@ REDIS_CONTAINER_NAME=redis-server
 APP_CONTAINER_NAME=go-redis-chat
 DOCKER_NETWORK=go-redis-chat-server_default
 
-# 取消外部環境中敏感 build args 影響，改用空值覆蓋
+# Prevent sensitive build args from the external environment from affecting the build; override with empty values
 BUILD_ARGS := --build-arg API_KEY= --build-arg OTHER_SECRET=
 
 .PHONY: build
