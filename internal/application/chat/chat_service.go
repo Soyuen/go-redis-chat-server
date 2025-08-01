@@ -29,10 +29,6 @@ func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.Ch
 	}
 }
 
-func (s *chatService) AddUserToRoom(ctx context.Context, room, user string) error {
-	return s.memberRepo.AddUserToRoom(ctx, room, user)
-}
-
 func (s *chatService) CreateRoom(roomName string) error {
 	s.channelManager.GetOrCreateChannel(roomName)
 	s.goFunc(func() {
@@ -68,4 +64,8 @@ func (s *chatService) createAndBroadcastMessage(sender, channel, content string)
 	}
 
 	return nil
+}
+
+func (s *chatService) AddUserToRoom(ctx context.Context, room, user string) error {
+	return s.memberRepo.AddUserToRoom(ctx, room, user)
 }
