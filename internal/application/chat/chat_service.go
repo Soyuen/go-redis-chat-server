@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,15 +16,21 @@ type chatService struct {
 	redisSub       realtime.ChannelEventSubscriber
 	presenter      presenter.MessagePresenterInterface
 	goFunc         func(func())
+	memberRepo     domainchat.ChatMemberRepository
 }
 
-func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface) ChatService {
+func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface, memberRepo domainchat.ChatMemberRepository) ChatService {
 	return &chatService{
 		channelManager: channelManager,
 		redisSub:       redisSub,
 		presenter:      presenter,
 		goFunc:         func(f func()) { go f() },
+		memberRepo:     memberRepo,
 	}
+}
+
+func (s *chatService) AddUserToRoom(ctx context.Context, room, user string) error {
+	return s.memberRepo.AddUserToRoom(ctx, room, user)
 }
 
 func (s *chatService) CreateRoom(roomName string) error {

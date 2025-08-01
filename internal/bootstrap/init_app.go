@@ -7,6 +7,7 @@ import (
 	"github.com/Soyuen/go-redis-chat-server/internal/application/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/application/pubsub"
 	"github.com/Soyuen/go-redis-chat-server/internal/config"
+	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
 	"github.com/Soyuen/go-redis-chat-server/internal/infrastructure/realtime"
 	infraredis "github.com/Soyuen/go-redis-chat-server/internal/infrastructure/redis"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
@@ -54,8 +55,8 @@ func InitPresenter(logger loggeriface.Logger) presenter.MessagePresenterInterfac
 	return presenter.NewMessagePresenter(logger)
 }
 
-func InitChatService(manager *realtime.ChannelManager, subscriber *infraredis.RedisSubscriber, presenter presenter.MessagePresenterInterface) chat.ChatService {
-	return chat.NewChatService(manager, subscriber, presenter)
+func InitChatService(manager *realtime.ChannelManager, subscriber *infraredis.RedisSubscriber, presenter presenter.MessagePresenterInterface, memberRepo domainchat.ChatMemberRepository) chat.ChatService {
+	return chat.NewChatService(manager, subscriber, presenter, memberRepo)
 }
 
 func InitAppDependencies(logger loggeriface.Logger) (*AppDependencies, error) {
@@ -73,7 +74,8 @@ func InitAppDependencies(logger loggeriface.Logger) (*AppDependencies, error) {
 	subscriber := InitSubscriber(pubsub, manager, logger)
 	conn := InitConnectionHandler(manager, logger)
 	presenter := InitPresenter(logger)
-	chatSvc := InitChatService(manager, subscriber, presenter)
+	memberRepo := infraredis.NewChatMemberRepository(redisAdapter)
+	chatSvc := InitChatService(manager, subscriber, presenter, memberRepo)
 
 	return &AppDependencies{
 		RedisClient:    client,
