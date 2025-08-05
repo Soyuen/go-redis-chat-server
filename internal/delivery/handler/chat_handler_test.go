@@ -26,6 +26,7 @@ func TestChatHandler_JoinChannel_CreateRoomError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockChatService := chatmock.NewMockChatService(ctrl)
+	mockChatService.EXPECT().BroadcastSystemMessage(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 	mockConnection := realtimemock.NewMockConnection(ctrl)
 	mockPresenter := presentermock.NewMockMessagePresenterInterface(ctrl)
 	mockLogger := logmock.NewMockLogger(ctrl)
@@ -191,12 +192,12 @@ func TestChatHandler_LeaveHandler(t *testing.T) {
 	nickname := "Alice"
 
 	// successful
-	mockChatService.EXPECT().BroadcastSystemMessage(channel, nickname, "left").Return(nil)
+	mockChatService.EXPECT().BroadcastSystemMessage(gomock.Any(), channel, nickname, "left").Return(nil)
 	h := handlerChat.leaveHandler(channel, nickname)
 	h()
 
 	// failed
-	mockChatService.EXPECT().BroadcastSystemMessage(channel, nickname, "left").Return(errors.New("fail"))
+	mockChatService.EXPECT().BroadcastSystemMessage(gomock.Any(), channel, nickname, "left").Return(errors.New("fail"))
 	mockLogger.EXPECT().Warnw("failed to announce leave", gomock.Any())
 	h()
 }

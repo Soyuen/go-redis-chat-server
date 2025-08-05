@@ -1,4 +1,6 @@
 // internal/application/cache/ports.go
+//go:generate mockgen -destination=mocks/mock_redis_cache.go -package=mocks github.com/Soyuen/go-redis-chat-server/internal/application/cache RedisCache
+
 package cache
 
 import "context"

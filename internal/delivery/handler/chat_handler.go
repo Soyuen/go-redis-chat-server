@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"context"
+	"errors"
 	"net/http"
 
 	appchat "github.com/Soyuen/go-redis-chat-server/internal/application/chat"
@@ -50,6 +52,7 @@ func NewChatHandler(manager realtime.ChannelManager, connection realtime.Connect
 }
 
 func (h *ChatHandler) JoinChannel(c *gin.Context) {
+	ctx := context.Background()
 	channel := c.Query("channel")
 	if channel == "" {
 		c.JSON(http.StatusBadRequest, apperr.ErrorResponse{
@@ -74,16 +77,31 @@ func (h *ChatHandler) JoinChannel(c *gin.Context) {
 		return
 	}
 
-	if err := h.chatService.CreateRoom(channel); err != nil {
+	if err := h.chatService.JoinChannel(ctx, channel, nickname); err != nil {
 		conn.Close()
-		c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
-			Code: apperr.ErrCodeChannelCreationFailed,
-		})
+		switch {
+		case errors.Is(err, apperr.ErrCreateRoom):
+			h.logger.Errorw("create room failed", "err", err)
+			c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
+				Code: apperr.ErrCodeChannelCreationFailed,
+			})
+		case errors.Is(err, apperr.ErrAddUserToRoom):
+			h.logger.Errorw("add user to room failed", "err", err)
+			c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
+				Code: apperr.ErrCodeChannelJoinFailed,
+			})
+		case errors.Is(err, apperr.ErrBroadcastSystemMessage):
+			h.logger.Errorw("broadcast system message failed", "err", err)
+			c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
+				Code: apperr.ErrCodeChannelJoinFailed,
+			})
+		default:
+			h.logger.Errorw("unknown join channel error", "err", err)
+			c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
+				Code: apperr.ErrCodeChannelJoinFailed,
+			})
+		}
 		return
-	}
-
-	if err := h.chatService.BroadcastSystemMessage(channel, nickname, "joined"); err != nil {
-		h.logger.Warnw("failed to announce join", "err", err)
 	}
 
 	h.connection.HandleConnection(
@@ -108,7 +126,8 @@ func (h *ChatHandler) messageHandler(channel, nickname string) func(raw []byte) 
 
 func (h *ChatHandler) leaveHandler(channel, nickname string) func() {
 	return func() {
-		if err := h.chatService.BroadcastSystemMessage(channel, nickname, "left"); err != nil {
+		ctx := context.Background()
+		if err := h.chatService.BroadcastSystemMessage(ctx, channel, nickname, "left"); err != nil {
 			h.logger.Warnw("failed to announce leave", "err", err)
 		}
 	}

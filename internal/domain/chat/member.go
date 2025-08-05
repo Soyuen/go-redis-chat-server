@@ -1,5 +1,7 @@
 package chat
 
+//go:generate mockgen -destination=mocks/mock_chat_member_repository.go -package=mocks github.com/Soyuen/go-redis-chat-server/internal/domain/chat ChatMemberRepository
+
 import "context"
 
 type ChatMemberRepository interface {

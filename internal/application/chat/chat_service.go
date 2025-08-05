@@ -8,24 +8,28 @@ import (
 
 	"github.com/Soyuen/go-redis-chat-server/internal/application/realtime"
 	domainchat "github.com/Soyuen/go-redis-chat-server/internal/domain/chat"
+	apperr "github.com/Soyuen/go-redis-chat-server/internal/errors"
 	"github.com/Soyuen/go-redis-chat-server/internal/presenter"
+	"github.com/Soyuen/go-redis-chat-server/pkg/loggeriface"
 )
 
 type chatService struct {
 	channelManager realtime.ChannelManager
 	redisSub       realtime.ChannelEventSubscriber
 	presenter      presenter.MessagePresenterInterface
-	goFunc         func(func())
 	memberRepo     domainchat.ChatMemberRepository
+	logger         loggeriface.Logger
+	goFunc         func(func())
 }
 
-func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface, memberRepo domainchat.ChatMemberRepository) ChatService {
+func NewChatService(channelManager realtime.ChannelManager, redisSub realtime.ChannelEventSubscriber, presenter presenter.MessagePresenterInterface, memberRepo domainchat.ChatMemberRepository, logger loggeriface.Logger) ChatService {
 	return &chatService{
 		channelManager: channelManager,
 		redisSub:       redisSub,
 		presenter:      presenter,
-		goFunc:         func(f func()) { go f() },
 		memberRepo:     memberRepo,
+		logger:         logger,
+		goFunc:         func(f func()) { go f() },
 	}
 }
 
@@ -48,9 +52,18 @@ func (s *chatService) ProcessIncoming(raw []byte, sender, channel string) (*doma
 	return domainchat.NewMessage(sender, channel, payload.Content)
 }
 
-func (s *chatService) BroadcastSystemMessage(channel, nickname, action string) error {
+func (s *chatService) BroadcastSystemMessage(ctx context.Context, channel, nickname, action string) error {
 	content := fmt.Sprintf("%s %s the chat.", nickname, action)
-	return s.createAndBroadcastMessage("System", channel, content)
+	count, err := s.memberRepo.GetRoomUserCount(ctx, channel)
+	if err != nil {
+		return err
+	}
+	payload := map[string]interface{}{
+		"content": content,
+		"count":   count,
+	}
+	payloadBytes, _ := json.Marshal(payload)
+	return s.createAndBroadcastMessage("System", channel, string(payloadBytes))
 }
 
 func (s *chatService) createAndBroadcastMessage(sender, channel, content string) error {
@@ -66,6 +79,22 @@ func (s *chatService) createAndBroadcastMessage(sender, channel, content string)
 	return nil
 }
 
-func (s *chatService) AddUserToRoom(ctx context.Context, room, user string) error {
-	return s.memberRepo.AddUserToRoom(ctx, room, user)
+// 原子性 JoinChannel 實作
+func (s *chatService) JoinChannel(ctx context.Context, channel, nickname string) error {
+	// 1. Create room
+	if err := s.CreateRoom(channel); err != nil {
+		return fmt.Errorf("%w: %v", apperr.ErrCreateRoom, err)
+	}
+	// 2. Add user
+	if err := s.memberRepo.AddUserToRoom(ctx, channel, nickname); err != nil {
+		return fmt.Errorf("%w: %v", apperr.ErrAddUserToRoom, err)
+	}
+	// 3. Broadcast
+	if err := s.BroadcastSystemMessage(ctx, channel, nickname, "joined"); err != nil {
+		if rmErr := s.memberRepo.RemoveUserFromRoom(ctx, channel, nickname); rmErr != nil {
+			s.logger.Warnw("compensate RemoveUserFromRoom failed", "err", rmErr, "channel", channel, "nickname", nickname)
+		}
+		return fmt.Errorf("%w: %v", apperr.ErrBroadcastSystemMessage, err)
+	}
+	return nil
 }

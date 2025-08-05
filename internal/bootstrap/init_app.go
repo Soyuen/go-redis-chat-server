@@ -56,7 +56,7 @@ func InitPresenter(logger loggeriface.Logger) presenter.MessagePresenterInterfac
 }
 
 func InitChatService(manager *realtime.ChannelManager, subscriber *infraredis.RedisSubscriber, presenter presenter.MessagePresenterInterface, memberRepo domainchat.ChatMemberRepository) chat.ChatService {
-	return chat.NewChatService(manager, subscriber, presenter, memberRepo)
+	return chat.NewChatService(manager, subscriber, presenter, memberRepo, Logger)
 }
 
 func InitAppDependencies(logger loggeriface.Logger) (*AppDependencies, error) {

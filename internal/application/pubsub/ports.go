@@ -1,5 +1,7 @@
-// internal/application/pubsub/ports.go
 package pubsub
+
+//go:generate mockgen -destination=mocks/mock_subscription.go -package=mocks github.com/Soyuen/go-redis-chat-server/internal/application/pubsub Subscription
+//go:generate mockgen -destination=mocks/mock_pubsub.go -package=mocks github.com/Soyuen/go-redis-chat-server/internal/application/pubsub PubSub
 
 import "context"
 
