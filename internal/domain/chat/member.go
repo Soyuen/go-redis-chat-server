@@ -9,4 +9,5 @@ type ChatMemberRepository interface {
 	RemoveUserFromRoom(ctx context.Context, room, user string) error
 	GetRoomUserCount(ctx context.Context, room string) (int64, error)
 	GetRoomUserList(ctx context.Context, room string) ([]string, error)
+	UserExists(ctx context.Context, room, user string) (bool, error)
 }

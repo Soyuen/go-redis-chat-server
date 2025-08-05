@@ -15,4 +15,5 @@ type RedisCache interface {
 	ZRem(ctx context.Context, key, member string) error
 	ZCard(ctx context.Context, key string) (int64, error)
 	ZRange(ctx context.Context, key string, start, stop int64) ([]string, error)
+	ZScore(ctx context.Context, key, member string) (float64, error)
 }

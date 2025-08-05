@@ -13,4 +13,5 @@ type ChatService interface {
 	CreateRoom(roomName string) error
 	BroadcastSystemMessage(ctx context.Context, channel, nickname, action string) error
 	JoinChannel(ctx context.Context, channel, nickname string) error
+	UserExists(ctx context.Context, room, user string) (bool, error)
 }

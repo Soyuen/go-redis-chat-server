@@ -69,6 +69,22 @@ func (h *ChatHandler) JoinChannel(c *gin.Context) {
 		return
 	}
 
+	// 檢查 user 是否已存在於房間
+	exist, err := h.chatService.UserExists(ctx, channel, nickname)
+	if err != nil {
+		h.logger.Errorw("failed to check user exists", "err", err)
+		c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{
+			Code: apperr.ErrCodeInvalidRequestBody,
+		})
+		return
+	}
+	if exist {
+		c.JSON(http.StatusBadRequest, apperr.ErrorResponse{
+			Code: apperr.ErrCodeNicknameExists,
+		})
+		return
+	}
+
 	conn, err := h.upgraderFunc(c.Writer, c.Request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, apperr.ErrorResponse{

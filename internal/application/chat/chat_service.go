@@ -98,3 +98,7 @@ func (s *chatService) JoinChannel(ctx context.Context, channel, nickname string)
 	}
 	return nil
 }
+
+func (s *chatService) UserExists(ctx context.Context, room, user string) (bool, error) {
+	return s.memberRepo.UserExists(ctx, room, user)
+}

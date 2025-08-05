@@ -91,3 +91,18 @@ func (mr *MockChatServiceMockRecorder) ProcessIncoming(arg0, arg1, arg2 interfac
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessIncoming", reflect.TypeOf((*MockChatService)(nil).ProcessIncoming), arg0, arg1, arg2)
 }
+
+// UserExists mocks base method.
+func (m *MockChatService) UserExists(arg0 context.Context, arg1, arg2 string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UserExists", arg0, arg1, arg2)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UserExists indicates an expected call of UserExists.
+func (mr *MockChatServiceMockRecorder) UserExists(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserExists", reflect.TypeOf((*MockChatService)(nil).UserExists), arg0, arg1, arg2)
+}
